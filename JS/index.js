@@ -11,10 +11,12 @@ var mapOptions = {
 var map = L.map('mapdiv',mapOptions);
 
 //BaseMap
-var defaultBase = L.tileLayer.provider('USGSTNM').addTo(map);
+var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
+var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
 var baseLayers = {
-    'USGS TNM': defaultBase,
+    'Open Street Map': defaultBase,
+    'USGS TNM': L.tileLayer.provider('USGSTNM'),
     'ESRI Imagery': L.tileLayer.provider('Esri.WorldImagery'),
     'ESRI Ocean Basemap': L.tileLayer.provider('Esri.OceanBasemap'),
     'OSM Topo': L.tileLayer.provider('OpenTopoMap')
@@ -23,32 +25,37 @@ var baseLayers = {
 // var osm=new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
 //Layers
-var rights = L.esri.dynamicMapLayer({
+var seafood = L.esri.dynamicMapLayer({
     url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [0,1,2],
+    layers: [0],
+    useCors: false
+})
+.addTo(map);
+
+var utility = L.esri.dynamicMapLayer({
+    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
+    layers: [1],
+    useCors: false
+})
+.addTo(map);
+
+var ongrights = L.esri.dynamicMapLayer({
+    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
+    layers: [2],
     useCors: false
 })
 .addTo(map);
 
 //Query
-// var query = rights.setWhere("TENURE_NUMBER_ID = 'M00021679'")
-
-// var fc = rights.query()
-// .where("TENURE_NUMBER_ID = 'M00021679'")
-// .run(function(error, featureCollection){
-//     console.log(featureCollection);
-// });
-
 var queryString = window.location.search;
 
 queryString = queryString.substring(1);
-// var coords = queryString.split(",");
-// map.fitBounds([[coords[0],coords[1]],[coords[2],coords[3]]]); //London
 
 if (queryString){
-    rights.query().where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
+    ongrights.query().layer(2).where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
         if (error) {
         console.log(error);
+        console.log(latLngBounds)
         return;
         }
         map.fitBounds(latLngBounds);
@@ -58,7 +65,9 @@ if (queryString){
 //Overlay grouped layers    
 var groupOverLays = {
     "Layers": {
-        "ONG Rights": rights
+        "Seafood": seafood,
+        "Utility": utility,
+        "ONG Rights": ongrights
     }
 };
 
@@ -71,12 +80,6 @@ L.control.scale({
 }).addTo(map);
 
 // Overview mini map
-var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
-
-// var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-//     attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-// });
-
 var miniMap = new L.Control.MiniMap(osm, {
     toggleDisplay: true,
     minimized: false,
