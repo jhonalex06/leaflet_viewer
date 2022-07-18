@@ -25,9 +25,9 @@ var baseLayers = {
 // var osm=new L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
 //Layers
-var seafood = L.esri.dynamicMapLayer({
+var ongrights = L.esri.dynamicMapLayer({
     url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [0],
+    layers: [2],
     useCors: false
 })
 .addTo(map);
@@ -39,12 +39,38 @@ var utility = L.esri.dynamicMapLayer({
 })
 .addTo(map);
 
-var ongrights = L.esri.dynamicMapLayer({
+var seafood = L.esri.dynamicMapLayer({
     url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [2],
+    layers: [0],
     useCors: false
 })
 .addTo(map);
+
+var celda = L.esri.featureLayer({
+    url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
+    useCors: false
+})
+.addTo(map);
+
+celda.on('click', function(e){
+    if (e.layer.feature.properties.selected === true) {
+        celda.resetFeatureStyle(e.layer.feature.id);
+        e.layer.feature.properties.selected = false
+    }
+    else{
+        e.layer.feature.properties.selected = true
+        e.layer.bringToFront();
+        celda.setFeatureStyle(e.layer.feature.id, {
+            color: '#9D78D2',
+            weight: 3,
+            opacity: 1
+        });
+    }
+  });
+
+celda.eachFeature(function(layer) {
+    console.log(layer.feature.properties.selected);
+});
 
 //Query
 var queryString = window.location.search;
