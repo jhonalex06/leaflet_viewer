@@ -52,21 +52,7 @@ var celda = L.esri.featureLayer({
 })
 .addTo(map);
 
-celda.on('click', function(e){
-    if (e.layer.feature.properties.selected === true) {
-        celda.resetFeatureStyle(e.layer.feature.id);
-        e.layer.feature.properties.selected = false
-    }
-    else{
-        e.layer.feature.properties.selected = true
-        e.layer.bringToFront();
-        celda.setFeatureStyle(e.layer.feature.id, {
-            color: '#9D78D2',
-            weight: 3,
-            opacity: 1
-        });
-    }
-  });
+
 
 celda.eachFeature(function(layer) {
     console.log(layer.feature.properties.selected);
@@ -77,7 +63,7 @@ var queryString = window.location.search;
 
 queryString = queryString.substring(1);
 
-if (queryString){
+if (queryString && queryString !== 'MapSelection'){
     ongrights.query().layer(2).where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
         if (error) {
         console.log(error);
@@ -86,6 +72,24 @@ if (queryString){
         }
         map.fitBounds(latLngBounds);
     });
+}
+
+if (queryString && queryString === 'MapSelection'){
+    celda.on('click', function(e){
+        if (e.layer.feature.properties.selected === true) {
+            celda.resetFeatureStyle(e.layer.feature.id);
+            e.layer.feature.properties.selected = false
+        }
+        else{
+            e.layer.feature.properties.selected = true
+            e.layer.bringToFront();
+            celda.setFeatureStyle(e.layer.feature.id, {
+                color: '#1DDADA',
+                weight: 3,
+                opacity: 1
+            });
+        }
+      });
 }
 
 //Overlay grouped layers    
