@@ -3,34 +3,40 @@
 <head>
     <title>Geoviewer</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css"
-    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
-    crossorigin=""/>
-
-    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"
-    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
-    crossorigin=""></script>
-
-    <script src="https://unpkg.com/esri-leaflet@latest/dist/esri-leaflet.js"
-      integrity="sha512-E0DKVahIg0p1UHR2Kf9NX7x7TUewJb30mxkxEm2qOYTVJObgsAGpEol9F6iK6oefCbkJiA4/i6fnTHzM6H1kEA=="
+    <!-- Option: Replace @version for @latest -->
+    
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+      integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+      crossorigin=""/>
+  
+      <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+      integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
       crossorigin=""></script>
-
-    <script src="https://unpkg.com/esri-leaflet-vector@latest/dist/esri-leaflet-vector.js"
-      integrity="sha512-2sbebld2cAnzUw4nloopGcKE7AGl7xUlCXg8amUWS47veGTKMH6tx1VsT7U9ukwXPAVzecigXK0jMtS5UcllDg=="
-      crossorigin=""></script>
+  
+      <script src="https://unpkg.com/esri-leaflet@3.0.8/dist/esri-leaflet.js"
+        integrity="sha512-E0DKVahIg0p1UHR2Kf9NX7x7TUewJb30mxkxEm2qOYTVJObgsAGpEol9F6iK6oefCbkJiA4/i6fnTHzM6H1kEA=="
+        crossorigin=""></script>
+  
+      <script src="https://unpkg.com/esri-leaflet-vector@3.1.3/dist/esri-leaflet-vector.js"
+        integrity="sha512-2sbebld2cAnzUw4nloopGcKE7AGl7xUlCXg8amUWS47veGTKMH6tx1VsT7U9ukwXPAVzecigXK0jMtS5UcllDg=="
+        crossorigin=""></script>
     
     <!-- Leaflet Drawing Plugin: https://github.com/codeofsumit/leaflet.pm -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css">
-    <script src="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@2.2.0/dist/leaflet.pm.css">
+    <script src="https://unpkg.com/leaflet.pm@2.2.0/dist/leaflet.pm.min.js"></script>
 
     <script src="https://unpkg.com/esri-leaflet-renderers@3.0.0" crossorigin=""></script>
 
     <script src="JS/leaflet-providers.js"></script>
-    <script src="JS/leaflet.groupedlayercontrol.min.js"></script>
+    <!-- <script src="JS/leaflet.groupedlayercontrol.min.js"></script> -->
     <script src="JS/Control.MiniMap.min.js"></script>
+    <script src="JS/esri-leaflet-legend.js"></script>
+    <script src="JS/leaflet-panel-layers.js"></script>
+
 
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/Control.MiniMap.css">
+    <link rel="stylesheet" href="CSS/leaflet-panel-layers.css">
 
 </head>
 <body>
