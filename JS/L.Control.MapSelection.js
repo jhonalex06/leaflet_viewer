@@ -26,17 +26,12 @@ L.Control.MapSelection = L.Control.extend({
         container.appendChild(container3);
 
         btn.innerHTML = "Map Selection";
-        btn2.innerHTML = "Danna";
-        btn3.innerHTML = "Jhonsi";
-
-        console.log(celda);
-        console.log(this._layers[0].layer)
+        btn2.innerHTML = "Button1";
+        btn3.innerHTML = "Button2";
 
         var new_layer = this._layers[0].layer;
 
         function myFunction() {
-            console.log(celda);
-            console.log(new_layer);
             new_layer.eachFeature(function(lyr) {
                 if (lyr.feature.properties.selected){
                     console.log(lyr.feature.id);

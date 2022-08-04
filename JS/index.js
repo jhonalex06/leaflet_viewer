@@ -1,4 +1,4 @@
-//Map
+// Map
 var latlngMap = [46.5455, -66.7362];
 
 var mapOptions = {
@@ -11,7 +11,7 @@ var mapOptions = {
 var map = L.map('mapdiv',mapOptions);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
-//Layers
+// Layers
 var ongrights = L.esri.dynamicMapLayer({
     url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
     layers: [2],
@@ -33,7 +33,7 @@ var seafood = L.esri.dynamicMapLayer({
 })
 .addTo(map);
 
-var celda = L.esri.featureLayer({
+var grid = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
     useCors: true
 })
@@ -105,6 +105,11 @@ var overLayers = [
 				active: true,
 				name: "ONG Rights",
 				layer: ongrights
+			},
+            {
+				active: true,
+				name: "Grid",
+				layer: grid
 			}
 		]
     }];
@@ -115,22 +120,22 @@ var panelLayers = new L.Control.PanelLayers(baseLayer, overLayers, {
 	collapsibleGroups: true
 }).addTo(map);
 
-//Scale bar
+// Scale bar
 L.control.scale({
     position: 'bottomleft'
 }).addTo(map);
 
-//BaseMap Minimap
+// BaseMap Minimap
 var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
 
-//Overview mini map
+// Overview mini map
 var miniMap = new L.Control.MiniMap(osm, {
     toggleDisplay: true,
     minimized: false,
     position: 'bottomright'
 }).addTo(map);
 
-//Drawing toolbar options
+// Drawing toolbar options
 var options = {
     position: 'topright', // toolbar position, options are 'topleft', 'topright', 'bottomleft', 'bottomright'
     drawMarker: true, // adds button to draw markers
@@ -143,13 +148,13 @@ var options = {
     removalMode: true, // adds a button to remove layers
 };
 
-//Add leaflet.pm controls to the map
+// Add leaflet.pm controls to the map
 map.pm.addControls(options);
 
-//Legend
+// Legend
 L.esri.legendControl(seafood, { position: "topleft" }).addTo(map);
 
-//Query
+// Query (Find by Tenure ID)
 var queryString = window.location.search;
 
 queryString = queryString.substring(1);
@@ -170,16 +175,18 @@ if (queryString && queryString !== 'MapSelection'){
 // M00015995
 }
 
+
+// Map Selection
 if (queryString && queryString === 'MapSelection'){
-    celda.on('click', function(e){
+    grid.on('click', function(e){
         if (e.layer.feature.properties.selected === true) {
-            celda.resetFeatureStyle(e.layer.feature.id);
+            grid.resetFeatureStyle(e.layer.feature.id);
             e.layer.feature.properties.selected = false
         }
         else{
             e.layer.feature.properties.selected = true
             e.layer.bringToFront();
-            celda.setFeatureStyle(e.layer.feature.id, {
+            grid.setFeatureStyle(e.layer.feature.id, {
                 color: '#1DDADA',
                 weight: 3,
                 opacity: 1
@@ -188,7 +195,7 @@ if (queryString && queryString === 'MapSelection'){
       })
 
     const Map_AddLayer = {
-        'Layer': celda,
+        'Layer': grid,
     };
 
     L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
