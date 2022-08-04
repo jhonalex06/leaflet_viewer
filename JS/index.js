@@ -33,6 +33,12 @@ var seafood = L.esri.dynamicMapLayer({
 })
 .addTo(map);
 
+var celda = L.esri.featureLayer({
+    url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
+    useCors: true
+})
+.addTo(map);
+
 // //Layer switch control
 // var baseLayers = {
 //     'Open Street Map': L.tileLayer.provider('OpenStreetMap'),
@@ -101,50 +107,7 @@ var overLayers = [
 				layer: ongrights
 			}
 		]
-
-var celda = L.esri.featureLayer({
-    url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
-    useCors: false
-})
-.addTo(map);
-
-celda.eachFeature(function(layer) {
-    console.log(layer.feature.properties.selected);
-});
-
-//Query
-var queryString = window.location.search;
-
-queryString = queryString.substring(1);
-
-if (queryString && queryString !== 'MapSelection'){
-    ongrights.query().layer(2).where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
-        if (error) {
-        console.log(error);
-        console.log(latLngBounds)
-        return;
-        }
-        map.fitBounds(latLngBounds);
-    });
-}
-
-if (queryString && queryString === 'MapSelection'){
-    celda.on('click', function(e){
-        if (e.layer.feature.properties.selected === true) {
-            celda.resetFeatureStyle(e.layer.feature.id);
-            e.layer.feature.properties.selected = false
-        }
-        else{
-            e.layer.feature.properties.selected = true
-            e.layer.bringToFront();
-            celda.setFeatureStyle(e.layer.feature.id, {
-                color: '#1DDADA',
-                weight: 3,
-                opacity: 1
-            });
-        }
-      });
-}
+    }];
 
 var panelLayers = new L.Control.PanelLayers(baseLayer, overLayers, {
 	compact: true,
@@ -191,7 +154,7 @@ var queryString = window.location.search;
 
 queryString = queryString.substring(1);
 
-if (queryString){
+if (queryString && queryString !== 'MapSelection'){
     ongrights.query().layer(2).where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
         if (error) {
         console.log(error);
@@ -200,4 +163,33 @@ if (queryString){
         }
         map.fitBounds(latLngBounds);
     });
+
+// M00021679
+// M00021677
+// M00021658
+// M00015995
+}
+
+if (queryString && queryString === 'MapSelection'){
+    celda.on('click', function(e){
+        if (e.layer.feature.properties.selected === true) {
+            celda.resetFeatureStyle(e.layer.feature.id);
+            e.layer.feature.properties.selected = false
+        }
+        else{
+            e.layer.feature.properties.selected = true
+            e.layer.bringToFront();
+            celda.setFeatureStyle(e.layer.feature.id, {
+                color: '#1DDADA',
+                weight: 3,
+                opacity: 1
+            });
+        }
+      })
+
+    const Map_AddLayer = {
+        'Layer': celda,
+    };
+
+    L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
 }
