@@ -1,21 +1,20 @@
 // Map
+var gridstyle = [];
 var latlngMap = [46.5455, -66.7362];
 
 var mapOptions = {
-    center: latlngMap,
-    zoom: 8,
-    zoomControl: true,
     measureControl: true
 }
 
-var map = L.map('mapdiv',mapOptions);
+var map = L.map('mapdiv',mapOptions).setView(latlngMap, 8);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
+const lassoControl = L.control.lasso().addTo(map);
+lassoControl.setOptions({ intersect: true });
 
 // Layers
-var ongrights = L.esri.dynamicMapLayer({
-    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [2],
-    useCors: false
+var ongrights = L.esri.featureLayer({
+    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/2",
+    useCors: true
 })
 .addTo(map);
 
@@ -33,9 +32,9 @@ var seafood = L.esri.dynamicMapLayer({
 })
 .addTo(map);
 
-var grid = L.esri.featureLayer({
+const grid = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
-    useCors: true
+    useCors: true,
 })
 .addTo(map);
 
@@ -48,7 +47,7 @@ var grid = L.esri.featureLayer({
 //     'OSM Topo': L.tileLayer.provider('OpenTopoMap')
 // };
 
-// // //Overlay grouped layers    
+// // //Overlay grouped layers
 // var groupOverLays = {
 //     "Layers": {
 //         "ONG Rights": ongrights,
@@ -95,7 +94,7 @@ var overLayers = [
 				name: "Seafood",
                 // icon: '<img width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAASFJREFUOI3t1LEvQ0EcwPHvr6ovMbUGUV0kFlaWhtlma7SV1NShsfhLOhArE8N78hgkSCwmMeo/wNY+LB31NH0/Sxfx2jtikfgmN93lc7/hcml+ufQ/+KljnrMZ4g31WBRkgIlb7/Svt5nvfRsM6NQhbgJZMQAKCBm8tk/UqJK/dAZ9ol3Q/eSrtCBwEdDZrDB3bgV9ogVBm6MmH5YCDk95vS0z0x0LiqcNDJMWECCnDGrAwVgQQ9EBG6ZFOwhT7uDXswmgPIKuOHEeTxgLqBAKlN0G1NA6YZXZMCC6A9YsWlAxhXsrCKIx7VIKuQKWR2A3PSbqSRuJD3uLwssZ3dU+bzsCNWAJGAAPwNE0+ZN1JHYGAUrkDLA3XM798e/rJ30AVWZPq/J7JFcAAAAASUVORK5CYII=">',
 				layer: seafood
-			},	
+			},
 			{
 				active: true,
 				name: "Utility",
@@ -160,7 +159,8 @@ var queryString = window.location.search;
 queryString = queryString.substring(1);
 
 if (queryString && queryString !== 'MapSelection'){
-    ongrights.query().layer(2).where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
+
+    ongrights.query().where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
         if (error) {
         console.log(error);
         console.log(latLngBounds)
@@ -168,6 +168,25 @@ if (queryString && queryString !== 'MapSelection'){
         }
         map.fitBounds(latLngBounds);
     });
+
+    ongrights.on('load', function (e) {
+        ongrights.query().where(`TENURE_NUMBER_ID = '${queryString}'`).ids(function (error, ids) {
+            // if there is an error with the query, you can handle it here
+            if (error) {
+              console.log('Error with query: ' + error);
+            } else if (ids) {
+              previousIds = ids;
+              for (var i = ids.length - 1; i >= 0; i--) {
+                ongrights.setFeatureStyle(ids[i], {
+                    color: '#1DDADA',
+                    weight: 3,
+                    opacity: 1
+                });
+              }
+            }});
+    });
+
+
 
 // M00021679
 // M00021677
@@ -178,25 +197,77 @@ if (queryString && queryString !== 'MapSelection'){
 
 // Map Selection
 if (queryString && queryString === 'MapSelection'){
-    grid.on('click', function(e){
-        if (e.layer.feature.properties.selected === true) {
-            grid.resetFeatureStyle(e.layer.feature.id);
-            e.layer.feature.properties.selected = false
-        }
-        else{
-            e.layer.feature.properties.selected = true
-            e.layer.bringToFront();
-            grid.setFeatureStyle(e.layer.feature.id, {
-                color: '#1DDADA',
-                weight: 3,
-                opacity: 1
-            });
-        }
-      })
 
     const Map_AddLayer = {
         'Layer': grid,
     };
 
     L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
+}
+
+// Lasso Selection
+
+grid.on('click', function(e){
+    
+  })
+
+function setSelectedLayers(layers) {
+    // resetSelectedState();
+
+    layers.forEach(layer => {
+        // layer.setStyle({ color: '#ff4620' });
+        if (layer.options.url === grid.options.url) {
+            if (layer.feature.properties.selected === true) {
+                grid.resetFeatureStyle(layer.feature.id);
+                layer.feature.properties.selected = false
+            }
+            else{
+                layer.feature.properties.selected = true
+                layer.bringToFront();
+                grid.setFeatureStyle(layer.feature.id, {
+                    color: '#1DDADA',
+                    weight: 3,
+                    opacity: 1
+                });
+            }
+        }
+    });
+}
+
+map.on('lasso.finished', event => {
+    setSelectedLayers(event.layers);
+});
+
+// Zoom reload
+
+grid.on('load', function (e) {
+    myZoomHandler();
+});
+
+map.on('zoomend', function (e) {
+    myZoomHandler2();
+})
+
+function myZoomHandler() {
+    gridstyle.forEach(item => {
+        var ft = grid.getFeature(item)
+        console.log(ft)
+        ft.feature.properties.selected = true
+        ft.bringToFront();
+        grid.setFeatureStyle(item, {
+            color: '#1DDADA',
+            weight: 3,
+            opacity: 1
+        });
+    });
+}
+
+function myZoomHandler2() {
+    gridstyle = [];
+    grid.eachFeature(function(layer) {
+        if (layer.feature.properties.selected){
+            console.log(layer.feature.id);
+            gridstyle.push(layer.feature.id)
+        }
+    });
 }
