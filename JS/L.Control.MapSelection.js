@@ -28,6 +28,8 @@ L.Control.MapSelection = L.Control.extend({
         // btn2.innerHTML = "Button1";
         // btn3.innerHTML = "Button2";
 
+        var grid = this._layers[0].layer
+
         grid.on('click', function(e){
             if (e.layer.feature.properties.selected === true) {
                 grid.resetFeatureStyle(e.layer.feature.id);

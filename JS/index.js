@@ -1,5 +1,6 @@
+import { selectionEventHandler } from './selectionHandler.js';
+
 // Map
-var gridstyle = [];
 var latlngMap = [46.5455, -66.7362];
 
 var mapOptions = {
@@ -8,8 +9,7 @@ var mapOptions = {
 
 var map = L.map('mapdiv',mapOptions).setView(latlngMap, 8);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
-const lassoControl = L.control.lasso().addTo(map);
-lassoControl.setOptions({ intersect: true });
+
 
 // Layers
 var ongrights = L.esri.featureLayer({
@@ -32,31 +32,13 @@ var seafood = L.esri.dynamicMapLayer({
 })
 .addTo(map);
 
-const grid = L.esri.featureLayer({
+var grid = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
+    // url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_Tenure_Op/MapServer/12",
+    // minZoom: 14,
     useCors: true,
 })
 .addTo(map);
-
-// //Layer switch control
-// var baseLayers = {
-//     'Open Street Map': L.tileLayer.provider('OpenStreetMap'),
-//     'USGS TNM': L.tileLayer.provider('USGSTNM'),
-//     'ESRI Imagery': L.tileLayer.provider('Esri.WorldImagery'),
-//     'ESRI Ocean Basemap': L.tileLayer.provider('Esri.OceanBasemap'),
-//     'OSM Topo': L.tileLayer.provider('OpenTopoMap')
-// };
-
-// // //Overlay grouped layers
-// var groupOverLays = {
-//     "Layers": {
-//         "ONG Rights": ongrights,
-//         "Utility": utility,
-//         "Seafood": seafood
-//     }
-// };
-
-// L.control.groupedLayers(baseLayers, groupOverLays).addTo(map);
 
 var baseLayer = [
 	{
@@ -65,7 +47,8 @@ var baseLayer = [
 		layers: [
             {
                 name: "Open Street Map",
-                layer: L.tileLayer.provider('OpenStreetMap')
+                layer: defaultBase
+                // layer: L.tileLayer.provider('OpenStreetMap')
             },
             {
                 name: "USGS TNM",
@@ -92,8 +75,7 @@ var overLayers = [
             {
 				active: true,
 				name: "Seafood",
-                // icon: '<img width="20" height="20" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAASFJREFUOI3t1LEvQ0EcwPHvr6ovMbUGUV0kFlaWhtlma7SV1NShsfhLOhArE8N78hgkSCwmMeo/wNY+LB31NH0/Sxfx2jtikfgmN93lc7/hcml+ufQ/+KljnrMZ4g31WBRkgIlb7/Svt5nvfRsM6NQhbgJZMQAKCBm8tk/UqJK/dAZ9ol3Q/eSrtCBwEdDZrDB3bgV9ogVBm6MmH5YCDk95vS0z0x0LiqcNDJMWECCnDGrAwVgQQ9EBG6ZFOwhT7uDXswmgPIKuOHEeTxgLqBAKlN0G1NA6YZXZMCC6A9YsWlAxhXsrCKIx7VIKuQKWR2A3PSbqSRuJD3uLwssZ3dU+bzsCNWAJGAAPwNE0+ZN1JHYGAUrkDLA3XM798e/rJ30AVWZPq/J7JFcAAAAASUVORK5CYII=">',
-				layer: seafood
+                layer: seafood
 			},
 			{
 				active: true,
@@ -203,71 +185,9 @@ if (queryString && queryString === 'MapSelection'){
     };
 
     L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
-}
 
-// Lasso Selection
+    const lassoControl = L.control.lasso({position: 'bottomright', title: 'Pitufina'}).addTo(map);
+    lassoControl.setOptions({ intersect: true });
 
-grid.on('click', function(e){
-    
-  })
-
-function setSelectedLayers(layers) {
-    // resetSelectedState();
-
-    layers.forEach(layer => {
-        // layer.setStyle({ color: '#ff4620' });
-        if (layer.options.url === grid.options.url) {
-            if (layer.feature.properties.selected === true) {
-                grid.resetFeatureStyle(layer.feature.id);
-                layer.feature.properties.selected = false
-            }
-            else{
-                layer.feature.properties.selected = true
-                layer.bringToFront();
-                grid.setFeatureStyle(layer.feature.id, {
-                    color: '#1DDADA',
-                    weight: 3,
-                    opacity: 1
-                });
-            }
-        }
-    });
-}
-
-map.on('lasso.finished', event => {
-    setSelectedLayers(event.layers);
-});
-
-// Zoom reload
-
-grid.on('load', function (e) {
-    myZoomHandler();
-});
-
-map.on('zoomend', function (e) {
-    myZoomHandler2();
-})
-
-function myZoomHandler() {
-    gridstyle.forEach(item => {
-        var ft = grid.getFeature(item)
-        console.log(ft)
-        ft.feature.properties.selected = true
-        ft.bringToFront();
-        grid.setFeatureStyle(item, {
-            color: '#1DDADA',
-            weight: 3,
-            opacity: 1
-        });
-    });
-}
-
-function myZoomHandler2() {
-    gridstyle = [];
-    grid.eachFeature(function(layer) {
-        if (layer.feature.properties.selected){
-            console.log(layer.feature.id);
-            gridstyle.push(layer.feature.id)
-        }
-    });
+    selectionEventHandler(map, grid);
 }
