@@ -51,10 +51,6 @@ var baseLayer = [
                 // layer: L.tileLayer.provider('OpenStreetMap')
             },
             {
-                name: "USGS TNM",
-                layer: L.tileLayer.provider('USGSTNM')
-            },
-            {
                 name: "ESRI Imagery",
                 layer: L.tileLayer.provider('Esri.WorldImagery')
             },{
@@ -98,7 +94,8 @@ var overLayers = [
 var panelLayers = new L.Control.PanelLayers(baseLayer, overLayers, {
 	compact: true,
 	// collapsed: true,
-	collapsibleGroups: true
+	collapsibleGroups: true,
+    position:'topleft'
 }).addTo(map);
 
 // Scale bar
@@ -111,9 +108,7 @@ var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
 
 // Overview mini map
 var miniMap = new L.Control.MiniMap(osm, {
-    toggleDisplay: true,
-    minimized: false,
-    position: 'bottomright'
+    toggleDisplay: true
 }).addTo(map);
 
 // Drawing toolbar options
@@ -186,7 +181,7 @@ if (queryString && queryString === 'MapSelection'){
 
     L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
 
-    const lassoControl = L.control.lasso({position: 'bottomright', title: 'Pitufina'}).addTo(map);
+    const lassoControl = L.control.lasso({position: 'bottomright', title: 'Lasso'}).addTo(map);
     lassoControl.setOptions({ intersect: true });
 
     selectionEventHandler(map, grid);
