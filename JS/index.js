@@ -4,17 +4,20 @@ import { selectionEventHandler } from './selectionHandler.js';
 var latlngMap = [46.5455, -66.7362];
 
 var mapOptions = {
-    measureControl: true
+    fullscreenControl: true,
+    measureControl: false,
+    zoomsliderControl: true,
+    zoomControl: false,
+    pmIgnore: false
 }
 
 var map = L.map('mapdiv',mapOptions).setView(latlngMap, 8);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
-
 // Layers
 var ongrights = L.esri.featureLayer({
     url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/2",
-    useCors: true
+    useCors: true,
 })
 .addTo(map);
 
@@ -34,9 +37,8 @@ var seafood = L.esri.dynamicMapLayer({
 
 var grid = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
-    // url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_Tenure_Op/MapServer/12",
     // minZoom: 14,
-    useCors: true,
+    useCors: true
 })
 .addTo(map);
 
@@ -95,25 +97,23 @@ var panelLayers = new L.Control.PanelLayers(baseLayer, overLayers, {
 	compact: true,
 	// collapsed: true,
 	collapsibleGroups: true,
-    position:'topleft'
+    position:'topright'
 }).addTo(map);
 
 // Scale bar
 L.control.scale({
-    position: 'bottomleft'
+    position: 'bottomleft',
+    updateWhenIdle: true
 }).addTo(map);
 
-// BaseMap Minimap
-var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
-
 // Overview mini map
-var miniMap = new L.Control.MiniMap(osm, {
+var miniMap = new L.Control.MiniMap(L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png'), {
     toggleDisplay: true
 }).addTo(map);
 
 // Drawing toolbar options
 var options = {
-    position: 'topright', // toolbar position, options are 'topleft', 'topright', 'bottomleft', 'bottomright'
+    position: 'topleft', // toolbar position, options are 'topleft', 'topright', 'bottomleft', 'bottomright'
     drawMarker: true, // adds button to draw markers
     drawPolyline: true, // adds button to draw a polyline
     drawRectangle: true, // adds button to draw a rectangle
@@ -122,13 +122,38 @@ var options = {
     cutPolygon: true, // adds button to cut a hole in a polygon
     editMode: true, // adds button to toggle edit mode for all layers
     removalMode: true, // adds a button to remove layers
+    dragMode: true,
+    oneBlock: false,
+    customControls: true
 };
 
 // Add leaflet.pm controls to the map
 map.pm.addControls(options);
 
+//Block dragMode in all layers
+L.PM.setOptIn(false);
+
+//Allow toolbar options just after event
+map.on('pm:create', (e) => {
+    ongrights.setStyle({ pmIgnore: true });
+    grid.setStyle({ pmIgnore: true });
+    L.PM.reInitLayer(e.layer);    
+  });
+  
+var browserControl = L.control.browserPrint({printModes: ["Portrait", "Landscape", "Auto"], documentTitle:'PGTS-Viewer'}).addTo(map);
+
 // Legend
-L.esri.legendControl(seafood, { position: "topleft" }).addTo(map);
+L.esri.legendControl(seafood, { position: 'topright' }).addTo(map);
+
+const provider = new GeoSearch.OpenStreetMapProvider();
+
+const searchControl = new GeoSearch.GeoSearchControl({
+    provider: provider,
+    style: 'bar',
+    position: 'topright'
+});
+
+map.addControl(searchControl);
 
 // Query (Find by Tenure ID)
 var queryString = window.location.search;
@@ -162,8 +187,6 @@ if (queryString && queryString !== 'MapSelection'){
               }
             }});
     });
-
-
 
 // M00021679
 // M00021677
