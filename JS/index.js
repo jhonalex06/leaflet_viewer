@@ -1,4 +1,5 @@
 import { selectionEventHandler } from './selectionHandler.js';
+import * as generalConfig from './generalConfig.js'
 
 // Map
 const zoomMap = 8;
@@ -13,6 +14,7 @@ var mapOptions = {
     pmIgnore: false,
     minZoom: 3,
     maxZoom: 15,
+    measureControl: true,
     contextmenu: true,
     contextmenuWidth: 140,
 	contextmenuItems: [{
@@ -34,6 +36,8 @@ var mapOptions = {
 
 var map = L.map('mapdiv',mapOptions).setView([latMap, lngMap], zoomMap);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
+
+L.control.MapMeasure().addTo(map);
 
 //Locate control
 map.addControl(L.control.locate({
@@ -159,30 +163,39 @@ function zoomOut (e) {
 	map.zoomOut();
 }
 
+function LoadUrl(layersArray){
+    
+    var layersLegend = []
+
+    for (var layers of layersArray){
+        const url = Object.keys(layers)[0]
+
+        for (var list of layers[url]){
+            var layerLoaded = L.esri.dynamicMapLayer({
+                url: url,
+                layers: [list['id']],
+                minZoom: list['minZoom'],
+                useCors: false
+            })
+            .addTo(map);
+    
+            layersLegend.push({
+                active: list['active'],
+                name: list['name'],
+                layer: layerLoaded,
+            });
+        }
+    }
+
+    return layersLegend
+}
+
 // Layers
-var ongrights = L.esri.featureLayer({
-    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/2",
-    useCors: true,
-})
-.addTo(map);
+var layersLegend = LoadUrl(generalConfig.layers_lts_tenure['layers']);
 
-var utility = L.esri.dynamicMapLayer({
-    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [1],
-    useCors: false
-})
-.addTo(map);
-
-var seafood = L.esri.dynamicMapLayer({
-    url: "https://humpback1:6443/arcgis/rest/services/AlternativeGCX/Test/MapServer/",
-    layers: [0],
-    useCors: false
-})
-.addTo(map);
-
-var grid = L.esri.featureLayer({
-    url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_BaseMaps/MapServer/5",
-    // minZoom: 14,
+var Sections = L.esri.featureLayer({
+    url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_Tenure_Op/MapServer/191",
+    minZoom: 14,
     useCors: true
 })
 .addTo(map);
@@ -213,29 +226,8 @@ var baseLayer = [
 
 var overLayers = [
 	{
-		group: "Layers",
-		layers: [
-            {
-				active: true,
-				name: "Seafood",
-                layer: seafood
-			},
-			{
-				active: true,
-				name: "Utility",
-				layer: utility
-			},
-            {
-				active: true,
-				name: "ONG Rights",
-				layer: ongrights
-			},
-            {
-				active: true,
-				name: "Grid",
-				layer: grid
-			}
-		]
+		group: "Minerals and Resource Development",
+		layers: layersLegend
     }];
 
 var panelLayers = new L.Control.PanelLayers(baseLayer, overLayers, {
@@ -281,7 +273,7 @@ L.PM.setOptIn(false);
 //Allow toolbar options just after event
 map.on('pm:create', (e) => {
     ongrights.setStyle({ pmIgnore: true });
-    // grid.setStyle({ pmIgnore: true });
+    // Sections.setStyle({ pmIgnore: true });
     L.PM.reInitLayer(e.layer);    
   });
 
@@ -289,7 +281,7 @@ map.on('pm:create', (e) => {
 var browserControl = L.control.browserPrint({printModes: ["Portrait", "Landscape", "Auto"], documentTitle:'PGTS-Viewer', title:"Print Map"}).addTo(map);
 
 // Legend
-L.esri.legendControl(seafood, { position: 'topright' }).addTo(map);
+// L.esri.legendControl(seafood, { position: 'topright' }).addTo(map);
 
 //Search location
 const provider = new GeoSearch.OpenStreetMapProvider();
@@ -389,7 +381,7 @@ if (queryString && queryString !== 'MapSelection'){
 if (queryString && queryString === 'MapSelection'){
 
     const Map_AddLayer = {
-        'Layer': grid,
+        'Layer': Sections,
     };
 
     L.control.MapSelection(Map_AddLayer, { position: 'bottomright'}).addTo(map);
@@ -397,5 +389,6 @@ if (queryString && queryString === 'MapSelection'){
     const lassoControl = L.control.lasso({position: 'bottomright', title: 'Lasso'}).addTo(map);
     lassoControl.setOptions({ intersect: true });
 
-    selectionEventHandler(map, grid);
+    selectionEventHandler(map, Sections);
 }
+
