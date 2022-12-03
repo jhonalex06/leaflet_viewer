@@ -37,7 +37,8 @@ var mapOptions = {
 var map = L.map('mapdiv',mapOptions).setView([latMap, lngMap], zoomMap);
 var defaultBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
 
-L.control.MapMeasure().addTo(map);
+// Map measure testing
+// L.control.MapMeasure().addTo(map);
 
 //Locate control
 map.addControl(L.control.locate({
@@ -190,8 +191,13 @@ function LoadUrl(layersArray){
     return layersLegend
 }
 
+function loadUrl2(obj){
+
+}
+
 // Layers
-var layersLegend = LoadUrl(generalConfig.layers_lts_tenure['layers']);
+// var layersLegend = LoadUrl(generalConfig.layers_lts_tenure['layers']);
+var layersLegend = loadUrl2(generalConfig.layers_lts_tenure);
 
 var Sections = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_Tenure_Op/MapServer/191",
