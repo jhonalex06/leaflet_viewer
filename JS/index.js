@@ -195,16 +195,25 @@ function loadUrl2(obj){
 
 }
 
-// Layers
-// var layersLegend = LoadUrl(generalConfig.layers_lts_tenure['layers']);
-var layersLegend = loadUrl2(generalConfig.layers_lts_tenure);
-
 var Sections = L.esri.featureLayer({
     url: "http://cat2:6080/arcgis/rest/services/LTStest/LTS_Tenure_Op/MapServer/191",
     minZoom: 14,
     useCors: true
 })
 .addTo(map);
+
+var MineralTenure = L.esri.featureLayer({
+    url: "http://cat2:6080/arcgis/rest/services/LTSbeta/LTS_Tenure_Op/MapServer/7",
+    minZoom: 14,
+    useCors: true
+})
+.addTo(map);
+
+// Layers
+// generalConfig.js
+var layersLegend = LoadUrl(generalConfig.layers_lts_tenure['layers']);
+// generalConfig_Update.js
+// var layersLegend = loadUrl2(generalConfig.layers_lts_tenure);
 
 var baseLayer = [
 	{
@@ -232,7 +241,7 @@ var baseLayer = [
 
 var overLayers = [
 	{
-		group: "Minerals and Resource Development",
+		group: generalConfig.layers_lts_tenure["group"],
 		layers: layersLegend
     }];
 
@@ -349,9 +358,13 @@ var queryString = window.location.search;
 
 queryString = queryString.substring(1);
 
+console.log(MineralTenure)
+
 if (queryString && queryString !== 'MapSelection'){
 
-    ongrights.query().where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
+    console.log(`TENURE_NUMBER_ID = '${queryString}'`)
+
+    MineralTenure.query().where(`TENURE_NUMBER_ID = '${queryString}'`).bounds(function (error, latLngBounds, response) {
         if (error) {
         console.log(error);
         console.log(latLngBounds)
@@ -360,15 +373,15 @@ if (queryString && queryString !== 'MapSelection'){
         map.fitBounds(latLngBounds);
     });
 
-    ongrights.on('load', function (e) {
-        ongrights.query().where(`TENURE_NUMBER_ID = '${queryString}'`).ids(function (error, ids) {
+    MineralTenure.on('load', function (e) {
+        MineralTenure.query().where(`TENURE_NUMBER_ID = '${queryString}'`).ids(function (error, ids) {
             // if there is an error with the query, you can handle it here
             if (error) {
               console.log('Error with query: ' + error);
             } else if (ids) {
-              previousIds = ids;
+            //   previousIds = ids;
               for (var i = ids.length - 1; i >= 0; i--) {
-                ongrights.setFeatureStyle(ids[i], {
+                MineralTenure.setFeatureStyle(ids[i], {
                     color: '#1DDADA',
                     weight: 3,
                     opacity: 1
